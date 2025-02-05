@@ -14,9 +14,13 @@ function togglePrintView() {
     document.querySelector('.flex-column').remove();
     document.querySelector('.react-code-size-details-banner').remove();
     document.querySelector('#repos-sticky-header').remove();
-    document.querySelector('div[data-testid="breadcrumbs-filename"');
     document.querySelector("section").style.margin = 0;
     document.querySelector(".js-snippet-clipboard-copy-unpositioned").style.padding = 0;
+    let filename = document.querySelector('div[data-testid="breadcrumbs-filename"]');
+    const today = new Date();
+    const dateStr = `${today.getDate()}. ${today.getMonth() + 1}. ${today.getFullYear()}`;
+    filename.insertAdjacentHTML('afterend', `<h4>${dateStr}</h4>`);
+    filename.insertAdjacentHTML('afterend', '<div style="margin: 0 4px;">@</div>');
 }
 
 const svgHtml = ' \
