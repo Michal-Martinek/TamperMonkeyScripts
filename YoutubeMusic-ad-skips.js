@@ -74,7 +74,7 @@ function dismissPremiumBanner() {
 
   // from: ktakeda47/AutoClickYouTubeSkipAdButton.user.js
     const callback = (muts, observer) => {
-        console.log("Observer callback called");
+        // console.log("Observer callback called");
         dismissPremiumBanner();
         for (const m of muts) {
             if (m.type === 'childList') {
@@ -83,7 +83,7 @@ function dismissPremiumBanner() {
         }
         if (isAd()) {
             console.log('ad detected');
-            setTimeout(skipSong, 200);
+            setTimeout(skipSong, 300);
             return;
         }
         // findSkipBtn();
@@ -116,3 +116,62 @@ function dismissPremiumBanner() {
   // const target = document.documentElement;
   startObservation(titleNode);
 })();
+
+// playlist add ------------------------------------
+function checkPlaylistAdd() {
+    let toast = document.querySelector('tp-yt-paper-toast#toast');
+    if (toast == null) return console.error('ERROR add to playlist toast notification expected');
+    console.log('found toast notification for playlist add')
+    let str = toast.querySelector('div#text-container').innerText;
+    console.log(`found toast: ${str}`)
+    console.log(JSON.stringify(str))
+    if (str.includes('Tuto skladbu u') && str.includes('playlistu máte')) {
+        console.log('song already in playlist')
+    } else if (str.includes('Uloženo do playlistu Songs')) {
+        console.log('sucessfully added to playlist Songs')
+    } else {
+        console.error('Unknown toast message')
+    }
+}
+
+function loadAddMenu(retries=0) {
+    if (retries >= 3) return;
+    let menuOptions = document.querySelectorAll('ytmusic-menu-navigation-item-renderer.ytmusic-menu-popup-renderer');
+    console.log(`loading add menu, retries=${retries}`)
+    for (const opt of menuOptions) {
+        if (!opt.innerText.includes('Uložit do playlistu')) continue;
+        console.log(`found menu item for adding to playlist:`, opt)
+        let ironDropdown = document.querySelector('tp-yt-iron-dropdown.style-scope ytmusic-popup-container')
+        // ironDropdown.youyouribute('aria-hidden', false);
+        if (ironDropdown === null) console.error('iron dropdown not found')
+        if (opt.visibilityState === 'visible' || !(opt.getAttribute('aria-hidden') == 'true')) {
+            setTimeout(opt.click, 50);
+            return;
+        }
+        console.log('not clicked because hidden')
+    }
+    console.log('menu item not found - expanding menu')
+    let moreMenu = document.querySelector('div.middle-controls-buttons').querySelector('button.yt-spec-button-shape-next[aria-label="Nabídka akcí"]');
+    moreMenu.click();
+    setTimeout(() => loadAddMenu(retries+1), 1500);
+}
+
+function addToPlaylist() {
+    let addBtn = document.querySelector('button.ytmusic-playlist-add-to-option-renderer[aria-label="Songs "]');
+    if (addBtn == null) {
+        console.error('ERROR add to playlist btn not found');
+        alert('ERROR: Add button not rendered');
+        // loadAddMenu();
+        return;
+    }
+    addBtn.click();
+    console.log('adding to playlist');
+    setTimeout(checkPlaylistAdd, 1000);
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ě') {
+    addToPlaylist();
+    //loadAddMenu()
+  }
+});
